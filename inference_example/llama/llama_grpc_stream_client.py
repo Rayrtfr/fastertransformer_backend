@@ -9,6 +9,7 @@ import json
 import multiprocessing as mp
 import numpy as np
 import time
+import random
 
 from functools import partial
 from transformers import LlamaForCausalLM, LlamaTokenizer
@@ -34,10 +35,10 @@ def _token2inputs(FLAGS, token):
     runtime_top_k = (FLAGS.sampling_topk * np.ones([input_ids.shape[0],1])).astype(np.uint32)
     runtime_top_p = FLAGS.sampling_topp * np.ones([input_ids.shape[0], 1]).astype(np.float32)
     beam_search_diversity_rate = 0.0 * np.ones([input_ids.shape[0], 1]).astype(np.float32)
-    temperature = 1.0 * np.ones([input_ids.shape[0], 1]).astype(np.float32)
+    temperature = 0.5 * np.ones([input_ids.shape[0], 1]).astype(np.float32)
     len_penalty = 1.0 * np.ones([input_ids.shape[0], 1]).astype(np.float32)
-    repetition_penalty = 1.0 * np.ones([input_ids.shape[0], 1]).astype(np.float32)
-    random_seed = 0 * np.ones([input_ids.shape[0], 1]).astype(np.uint64)
+    repetition_penalty = 1.2 * np.ones([input_ids.shape[0], 1]).astype(np.float32)
+    random_seed = random.randint(0, 1000) * np.ones([input_ids.shape[0], 1]).astype(np.uint64)
     is_return_log_probs = True * np.ones([input_ids.shape[0], 1]).astype(bool)
     bad_words_ids = np.array([[[0], [-1]]] * input_ids.shape[0], dtype=np.int32)
     stop_words_ids = np.array([[[2], [2]]] * input_ids.shape[0], dtype=np.int32)
@@ -217,7 +218,7 @@ if __name__ == '__main__':
                         help='Beam width for beam search. If setting 1, then using sampling.')
     parser.add_argument('-topk', '--sampling_topk', type=int, default=50, metavar='NUMBER',
                         help='Candidate (k) value of top k sampling in decoding. Default is 1.')
-    parser.add_argument('-topp', '--sampling_topp', type=float, default=0.0, metavar='NUMBER',
+    parser.add_argument('-topp', '--sampling_topp', type=float, default=0.95, metavar='NUMBER',
                         help='Probability (p) value of top p sampling in decoding. Default is 0.0. ')
     parser.add_argument('--model_name', type=str, default="fastertransformer",
                         help='model_name')
